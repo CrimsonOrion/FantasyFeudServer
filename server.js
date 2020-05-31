@@ -58,18 +58,6 @@ async function addQuestion(req, res, next) {
     return sendEventsToAll(newQuestion);
 }
 
-// Middleware for POST /answer endpoint
-async function addAnswer(req, res, next) {
-    const newAnswer = req.body;
-    answers.push(newAnswer);
-
-    // Send recently added answer as POST result
-    res.json(newAnswer)
-
-    // Invoke iterate and send function
-    return sendEventsToAll(newAnswer);
-}
-
 // Set cors and bodyParser middlewares
 app.use(cors());
 app.use(bodyParser.json());
@@ -77,14 +65,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Define endpoints
 app.post('/question', addQuestion);
-//app.post('/answer', addAnswer);
 app.get('/events', eventsHandler);
 app.get('/status', (req, res) => res.json({ clients: clients.length }));
 
 const PORT = process.env.PORT || 3001;
 
 let clients = [];
-let answers = [];
 let questions = [];
 
 // Start server on 3001 port
