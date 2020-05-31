@@ -1,7 +1,12 @@
 # Fantasy Feud Server
 Fantasy Feud Node JS Event Server
 
-Started by using<br>
->npm init -y<br>
->npm install --save express body-parser cors<br>
->node server.js
+## References
+[Using Server-Sent Events in Node.js](https://www.digitalocean.com/community/tutorials/nodejs-server-sent-events-build-realtime-app)
+
+## Usage
+```bash
+npm init -y
+npm install --save express body-parser cors
+node server.js
+```
