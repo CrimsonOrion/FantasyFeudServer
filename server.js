@@ -49,13 +49,18 @@ function sendEventsToAll(json) {
 // Middleware for POST /question endpoint
 async function addQuestion(req, res, next) {
     const newQuestion = req.body;
-    questions.push(newQuestion);
 
-    // Send recently added question as POST result
-    res.json(newQuestion)
+    if (newQuestion.IsValid === true) {
+        delete newQuestion.IsValid;
 
-    // Invoke iterate and send function
-    return sendEventsToAll(newQuestion);
+        questions.push(newQuestion);
+
+        // Send recently added question as POST result
+        res.json(newQuestion)
+
+        // Invoke iterate and send function
+        return sendEventsToAll(newQuestion);
+    }
 }
 
 // Set cors and bodyParser middlewares
