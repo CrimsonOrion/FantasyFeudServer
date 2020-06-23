@@ -50,16 +50,25 @@ function sendEventsToAll(json) {
 async function addQuestion(req, res, next) {
     const newQuestion = req.body;
 
-    if (newQuestion.IsValid === true) {
-        delete newQuestion.IsValid;
-
-        questions.push(newQuestion);
-
-        // Send recently added question as POST result
-        res.json(newQuestion)
-
-        // Invoke iterate and send function
-        return sendEventsToAll(newQuestion);
+    try {
+        if (newQuestion.IsValid === true) {
+            delete newQuestion.IsValid;
+    
+            questions.push(newQuestion);
+    
+            // Send recently added question as POST result
+            res.json(newQuestion)
+    
+            // Invoke iterate and send function
+            return sendEventsToAll(newQuestion);
+        } else {
+            // Throw an error if it isn't valid
+            throw ErrorEvent();
+        }
+    } catch (error) {
+        // Return an empty 200 message
+        res.json(error);
+        return error;   
     }
 }
 
