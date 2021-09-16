@@ -7,6 +7,6 @@ Fantasy Feud Node JS Event Server
 ## Usage
 ```bash
 npm init -y
-npm install --save express body-parser cors
+npm install --save express cors
 node server.js
 ```
