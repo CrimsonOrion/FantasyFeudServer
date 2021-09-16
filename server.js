@@ -1,9 +1,6 @@
 // Require needed modules and initialize Express app
 const express = require('express');
 
-// Body Parser for JSON parsing
-const bodyParser = require('body-parser');
-
 // CORS for Cross-Origin Resource Sharing
 const cors = require('cors');
 
@@ -74,8 +71,8 @@ async function addQuestion(req, res, next) {
 
 // Set cors and bodyParser middlewares
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Define endpoints
 app.post('/question', addQuestion);
