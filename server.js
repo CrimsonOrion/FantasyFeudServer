@@ -1,47 +1,33 @@
+require('dotenv').config({ quiet: true });
+
 // Require needed modules and initialize Express app
 const express = require('express');
+const http = require('http');
+const path = require('path');
 
 // CORS for Cross-Origin Resource Sharing
 const cors = require('cors');
 
+const routes = require('./routes');
+
 const app = express();
+const server = http.createServer(app);
+const io = require('socket.io')(server, {
+    cors: { origin: '*' }
+});
 
-// Middleware for GET /events endpoint
-function eventsHandler(req, res, next) {
-    // Mandatory headers and http status to keep connection open
-    const headers = {
-        'Content-Type': 'text/event-stream',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'no-cache'
-    };
-    res.writeHead(200, headers);
-    
-    // After client opens connection send all nests as string
-    const data = `data: ${JSON.stringify(questions)}\n\n`;
-    res.write(data);
-    res.flushHeaders();
-    // Generate an id based on timestamp and save res
-    // object of client connection on clients list
-    // Later we'll iterate it and send updates to each client
-    const clientId = Date.now();
-    const newClient = {
-        id: clientId,
-        res
-    };
-    clients.push(newClient);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+app.use(express.static(path.join(__dirname, 'public')));
 
-    // When client closes connection we update the clients list
-    // avoiding the disconnected one
-    req.on('close', () => {
-        console.log(`${clientId} Connection closed`);
-        clients = clients.filter(c => c.id !== clientId);
-    });
-}
+// Set cors and bodyParser middlewares
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// Iterate clients list and use write res object method to send visible
-function sendEventsToAll(json) {
-    clients.forEach(c => c.res.write(`data: ${JSON.stringify(json)}\n\n`))
-}
+// Latest board state, kept so a board that connects/reconnects mid-game
+// can catch up immediately instead of waiting for the next question.
+let currentState = null;
 
 // Middleware for POST /question endpoint
 async function addQuestion(req, res, next) {
@@ -50,14 +36,15 @@ async function addQuestion(req, res, next) {
     try {
         if (newQuestion.IsValid === true) {
             delete newQuestion.IsValid;
-    
-            questions.push(newQuestion);
-    
+
+            currentState = newQuestion;
+
             // Send recently added question as POST result
-            res.json(newQuestion)
-    
-            // Invoke iterate and send function
-            return sendEventsToAll(newQuestion);
+            res.json(newQuestion);
+
+            // Broadcast the new state to every connected board
+            io.emit('board:update', currentState);
+            return;
         } else {
             // Throw an error if it isn't valid
             throw ErrorEvent();
@@ -65,24 +52,34 @@ async function addQuestion(req, res, next) {
     } catch (error) {
         // Return an empty 200 message
         res.json(error);
-        return error;   
+        return error;
     }
 }
 
-// Set cors and bodyParser middlewares
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
 // Define endpoints
 app.post('/question', addQuestion);
-app.get('/events', eventsHandler);
-app.get('/status', (req, res) => res.json({ clients: clients.length }));
+app.get('/status', (req, res) => res.json({ clients: io.engine.clientsCount }));
+app.get('/current-state', (req, res) => res.json(currentState));
 
-const PORT = process.env.PORT || 3001;
+// Host pages: season/game picker backed by FantasyFeudApiServer content
+app.get('/', routes.index);
+app.get('/seasons/:id', routes.season);
+app.get('/games/:id', routes.game);
 
-let clients = [];
-let questions = [];
+io.on('connection', (socket) => {
+    console.log(`${socket.id} connected`);
 
-// Start server on 3001 port
-app.listen(PORT, function () { console.log(`Question service listening on port ${PORT}`); });
+    // A board asking to catch up on the current state (initial load or reconnect)
+    socket.on('board:init', () => {
+        socket.emit('board:update', currentState);
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`${socket.id} disconnected`);
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+
+// Start server on above PORT
+server.listen(PORT, function () { console.log('Fantasy Feud Admin server listening on port:', PORT); });

@@ -1,0 +1,51 @@
+extends layout
+
+block content
+  h1= game.game_title
+  p= game.description
+
+  section#teams
+    .team
+      h2 Team 1
+      input#team1Name(type="text", value="Team 1")
+      .score
+        button.score-btn(data-team="1", data-delta="-5") -5
+        input#team1Score(type="number", value="0")
+        button.score-btn(data-team="1", data-delta="5") +5
+        button.score-reset(data-team="1") Reset
+      button#awardPot1 Award Pot to Team 1
+      label Members (comma separated)
+      input#team1Members(type="text")
+      ul.memberSelect#team1MemberSelect
+    .team
+      h2 Team 2
+      input#team2Name(type="text", value="Team 2")
+      .score
+        button.score-btn(data-team="2", data-delta="-5") -5
+        input#team2Score(type="number", value="0")
+        button.score-btn(data-team="2", data-delta="5") +5
+        button.score-reset(data-team="2") Reset
+      button#awardPot2 Award Pot to Team 2
+      label Members (comma separated)
+      input#team2Members(type="text")
+      ul.memberSelect#team2MemberSelect
+
+  section#roundControls
+    span Strikes:
+    span#strikeCount 0
+    button#addStrike Add Strike
+    button#resetStrikes Reset Strikes
+    button#resetBoard Reset Board
+    button#resetGame Reset Game
+
+  section#questions
+    each question in game.questions
+      .question(data-question=JSON.stringify(question))
+        h3= question.question
+        button.start-question Start This Question
+        ul.answers
+          each answer, aIndex in question.answers
+            li
+              span.answer-text= answer.answer
+              span.answer-value= answer.value
+              button.reveal-toggle(data-index=aIndex, disabled) Reveal

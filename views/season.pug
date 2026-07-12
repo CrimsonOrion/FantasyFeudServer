@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1= seasonId
+  ul.list
+    each game in games
+      li
+        a(href="/games/" + game.id)= game.name
+        p= game.description
