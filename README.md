@@ -32,8 +32,8 @@ npm start
 ```
 
 Listens on port `3000` by default. `RESOURCE_SERVER` (default
-`localhost:3001`) tells it where to find `FantasyFeudApiServer` for the host
-UI's season/game listings.
+`http://localhost:3001`, must include the scheme) tells it where to find
+`FantasyFeudApiServer` for the host UI's season/game listings.
 
 ## Using the host UI
 
