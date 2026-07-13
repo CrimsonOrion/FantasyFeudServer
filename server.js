@@ -7,6 +7,7 @@ const path = require('path');
 
 // CORS for Cross-Origin Resource Sharing
 const cors = require('cors');
+const basicAuth = require('express-basic-auth');
 
 const routes = require('./routes');
 
@@ -61,10 +62,15 @@ app.post('/question', addQuestion);
 app.get('/status', (req, res) => res.json({ clients: io.engine.clientsCount }));
 app.get('/current-state', (req, res) => res.json(currentState));
 
-// Host pages: season/game picker backed by FantasyFeudApiServer content
-app.get('/', routes.index);
-app.get('/seasons/:id', routes.season);
-app.get('/games/:id', routes.game);
+// Host pages: season/game picker backed by FantasyFeudApiServer content.
+// Requires basic auth, same as Jeopardy's host-facing routes.
+const requireAuth = basicAuth({
+    users: { [process.env.AUTH_USER]: process.env.AUTH_PASS },
+    challenge: true
+});
+app.get('/', requireAuth, routes.index);
+app.get('/seasons/:id', requireAuth, routes.season);
+app.get('/games/:id', requireAuth, routes.game);
 
 io.on('connection', (socket) => {
     console.log(`${socket.id} connected`);
