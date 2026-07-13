@@ -35,9 +35,14 @@ Listens on port `3000` by default. `RESOURCE_SERVER` (default
 `http://localhost:3001`, must include the scheme) tells it where to find
 `FantasyFeudApiServer` for the host UI's season/game listings.
 
+The host UI (`/`, `/seasons/:id`, `/games/:id`) requires HTTP Basic Auth,
+same as Jeopardy's host-facing routes — the browser will prompt for
+credentials. Set them via `AUTH_USER`/`AUTH_PASS`.
+
 ## Using the host UI
 
-Open `http://localhost:3000/` in a browser:
+Open `http://localhost:3000/` in a browser (enter the `AUTH_USER`/`AUTH_PASS`
+credentials when prompted):
 
 1. Pick a season, then a game.
 2. Set team names and paste in each team's members (comma separated) — click
@@ -64,9 +69,9 @@ anything.
 | POST   | `/question`       | Push a full board-state JSON blob live (requires `IsValid: true`) |
 | GET    | `/current-state`  | The last state pushed via `/question`                          |
 | GET    | `/status`         | `{ "clients": <connected socket count> }`                      |
-| GET    | `/`               | Host UI: season list                                            |
-| GET    | `/seasons/:id`    | Host UI: games in a season                                      |
-| GET    | `/games/:id`      | Host UI: run a game (`:id` is `<season-id>---<game-id>`)       |
+| GET    | `/` *(auth required)*            | Host UI: season list                                     |
+| GET    | `/seasons/:id` *(auth required)* | Host UI: games in a season                                |
+| GET    | `/games/:id` *(auth required)*   | Host UI: run a game (`:id` is `<season-id>---<game-id>`) |
 
 ## Socket events
 
