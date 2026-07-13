@@ -87,9 +87,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 
-if (require.main === module) {
-    // Start server on above PORT
-    server.listen(PORT, function () { console.log('Fantasy Feud Admin server listening on port:', PORT); });
-}
-
-module.exports = { app, server, io };
+// Start server on above PORT
+server.listen(PORT, function () { console.log('Fantasy Feud Admin server listening on port:', PORT); });
